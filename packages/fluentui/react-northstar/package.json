@@ -9,6 +9,7 @@
     "@fluentui/accessibility": "^0.51.0",
     "@fluentui/dom-utilities": "^1.1.1",
     "@fluentui/keyboard-key": "^0.2.12",
+    "@fluentui/make-styles": "^0.1.0",
     "@fluentui/react-bindings": "^0.51.0",
     "@fluentui/react-component-event-listener": "^0.51.0",
     "@fluentui/react-component-nesting-registry": "^0.51.0",

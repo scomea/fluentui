@@ -1,3 +1,4 @@
+import { makeStyles as vanillaMakeStyles, MakeStylesDefinitions, MakeStylesOptions } from '@fluentui/make-styles';
 import { noopRenderer, Renderer } from '@fluentui/react-northstar-styles-renderer';
 import { emptyTheme, ThemeInput, ThemePrepared } from '@fluentui/styles';
 import * as React from 'react';
@@ -59,3 +60,18 @@ export function useFluentContext(): ProviderContextPrepared {
 }
 
 export const Unstable_FluentContextProvider = FluentContext.Provider;
+
+/*
+ * A wrapper to connect to a React context. SHOULD USE unified context!!!
+ */
+export function makeStyles<Selectors, Tokens>(definitions: MakeStylesDefinitions<Selectors, Tokens>[]) {
+  const result = vanillaMakeStyles(definitions);
+
+  return function ___(selectors: Selectors, ...classNames: (string | undefined)[]): string {
+    // @ts-ignore
+    const { rtl, theme, makeStylesRenderer } = React.useContext(FluentContext);
+    const options: MakeStylesOptions = { rtl, tokens: theme.siteVariables, renderer: makeStylesRenderer };
+
+    return result(selectors, options, ...classNames);
+  };
+}

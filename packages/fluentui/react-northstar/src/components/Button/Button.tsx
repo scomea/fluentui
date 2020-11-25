@@ -3,6 +3,7 @@ import {
   compose,
   ComponentWithAs,
   getElementType,
+  makeStyles,
   useAccessibility,
   useFluentContext,
   useStyles,
@@ -25,12 +26,14 @@ import {
   SizeValue,
   ShorthandFactory,
   createShorthand,
+  pxToRem,
 } from '../../utils';
 import { Box, BoxProps } from '../Box/Box';
 import { Loader, LoaderProps } from '../Loader/Loader';
 import { ComponentEventHandler, ShorthandValue } from '../../types';
 import { ButtonGroup } from './ButtonGroup';
 import { ButtonContent, ButtonContentProps } from './ButtonContent';
+import { faster, ultraFast } from '../../themes/teams/animations/durations';
 
 export interface ButtonProps
   extends UIComponentProps,
@@ -100,6 +103,264 @@ export type ButtonStylesProps = Pick<
   hasContent?: boolean;
 };
 
+type GetBorderFocusStylesOptions = {
+  padding: string;
+  radius: string;
+  width: string;
+
+  innerColor: string;
+  outerColor: string;
+
+  zIndex: string;
+};
+
+function getBorderFocusStyles(options: GetBorderFocusStylesOptions) {
+  return {
+    borderColor: 'transparent',
+
+    ':before': {
+      content: '""',
+      position: 'absolute',
+      borderStyle: 'solid',
+      pointerEvents: 'none',
+
+      borderColor: options.innerColor,
+      borderRadius: options.radius,
+      borderWidth: options.width,
+
+      zIndex: options.zIndex,
+
+      top: `calc(0px - ${options.padding})`,
+      bottom: `calc(0px - ${options.padding})`,
+      left: `calc(0px - ${options.padding})`,
+      right: `calc(0px - ${options.padding})`,
+    },
+
+    ':after': {
+      content: '""',
+      position: 'absolute',
+      borderStyle: 'solid',
+      pointerEvents: 'none',
+
+      borderColor: options.outerColor,
+      borderRadius: options.radius,
+      borderWidth: options.width,
+
+      zIndex: options.zIndex,
+
+      top: `calc(0px - ${options.padding} - ${options.width})`,
+      bottom: `calc(0px - ${options.padding} - ${options.width})`,
+      left: `calc(0px - ${options.padding} - ${options.width})`,
+      right: `calc(0px - ${options.padding} - ${options.width})`,
+    },
+  };
+}
+
+const useButtonStyles = makeStyles([
+  [
+    null,
+    tokens => ({
+      alignItems: 'center',
+      display: 'inline-flex',
+      justifyContent: 'center',
+      position: 'relative',
+      verticalAlign: 'middle',
+
+      cursor: 'pointer',
+      transition: faster,
+
+      padding: `0 ${pxToRem(20)}`,
+      height: pxToRem(32),
+      minWidth: pxToRem(96),
+      maxWidth: pxToRem(280),
+
+      backgroundColor: tokens.colorScheme.default.background,
+      borderColor: tokens.colorScheme.default.border,
+      borderRadius: tokens.borderRadius,
+      borderStyle: 'solid',
+      borderWidth: tokens.borderWidth,
+      boxShadow: tokens.shadowLevel1,
+      color: tokens.colorScheme.default.foreground,
+      outline: 0,
+
+      '--button-border-radius': tokens.borderWidth,
+
+      ':hover': {
+        backgroundColor: tokens.colorScheme.default.backgroundHover1,
+        borderColor: tokens.colorScheme.default.borderHover,
+        color: tokens.colorScheme.default.foregroundHover,
+      },
+
+      ':active': {
+        backgroundColor: tokens.colorScheme.default.backgroundPressed,
+        borderColor: tokens.colorScheme.default.borderPressed,
+        boxShadow: 'none',
+        color: tokens.colorScheme.default.foregroundPressed,
+        transition: ultraFast,
+      },
+
+      ':focus': { outline: 'none' },
+      ':focus-visible': {
+        ...getBorderFocusStyles({
+          innerColor: tokens.focusInnerBorderColor,
+          outerColor: tokens.focusOuterBorderColor,
+
+          padding: 'var(--button-border-radius)',
+          radius: tokens.borderRadius,
+          width: tokens.borderWidth,
+
+          zIndex: tokens.zIndexes.foreground,
+        }),
+
+        // backgroundColor: v.backgroundColorFocus,
+        // borderColor: v.borderColorFocus,
+        borderWidth: tokens.borderWidth,
+        // color: v.colorFocus,
+
+        ':hover': {
+          borderColor: tokens.colorScheme.default.borderHover,
+        },
+      },
+    }),
+  ],
+
+  [p => p.circular, { '--button-border-radius': pxToRem(4) }],
+  [p => p.loading, { minWidth: pxToRem(118) }],
+
+  [
+    p => p.size === 'small',
+    {
+      boxShadow: 'none',
+      height: pxToRem(24),
+      minWidth: pxToRem(72),
+      padding: `0 ${pxToRem(8)}`,
+    },
+  ],
+
+  [p => p.size === 'small', { boxShadow: 'none' }],
+
+  [
+    p => p.primary,
+    tokens => ({
+      backgroundColor: tokens.colorScheme.brand.background,
+      borderColor: 'transparent',
+      boxShadow: tokens.shadowLevel1Dark,
+      color: tokens.colorScheme.brand.foreground4,
+
+      ':active': {
+        backgroundColor: tokens.colorScheme.brand.backgroundPressed,
+        boxShadow: 'none',
+        transition: ultraFast,
+      },
+
+      ':focus': { outline: 'none' },
+      ':focus-visible': {
+        ...getBorderFocusStyles({
+          innerColor: tokens.focusInnerBorderColor,
+          outerColor: tokens.focusOuterBorderColor,
+
+          padding: 'var(--button-border-radius)',
+          radius: tokens.borderRadius,
+          width: tokens.borderWidth,
+
+          zIndex: tokens.zIndexes.foreground,
+        }),
+
+        // backgroundColor: v.primaryBackgroundColorFocus,
+      },
+
+      ':hover': {
+        backgroundColor: tokens.colorScheme.brand.backgroundHover,
+        color: tokens.colorScheme.brand.foreground4,
+      },
+    }),
+  ],
+
+  [
+    p => p.disabled,
+    tokens => ({
+      cursor: 'default',
+      pointerEvents: 'none',
+
+      boxShadow: 'none',
+
+      backgroundColor: tokens.colorScheme.default.backgroundDisabled,
+      borderColor: 'transparent',
+      color: tokens.colorScheme.brand.foregroundDisabled,
+
+      ':hover': {
+        color: tokens.colorScheme.brand.foregroundDisabled,
+      },
+    }),
+  ],
+  [
+    p => p.disabled && p.text,
+    tokens => ({
+      color: tokens.colorScheme.brand.foregroundDisabled1,
+      backgroundColor: 'transparent',
+
+      ':hover': {
+        color: tokens.colorScheme.brand.foregroundDisabled1,
+      },
+    }),
+  ],
+
+  [p => p.fluid, { width: '100%', maxWidth: '100%' }],
+]);
+const useButtonContentStyles = makeStyles([
+  [
+    null,
+    {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    },
+  ],
+  [
+    null,
+    tokens => ({
+      fontSize: tokens.fontSizes.medium,
+      fontWeight: tokens.fontWeightSemibold,
+      lineHeight: tokens.lineHeightMedium,
+    }),
+  ],
+
+  [
+    p => p.size === 'small',
+    tokens => ({
+      fontSize: tokens.fontSizes.small,
+      lineHeight: tokens.lineHeightSmall,
+    }),
+  ],
+]);
+const useButtonIconStyles = makeStyles([
+  // [
+  //   null,
+  //   ({ props: p, variables: v }) => ({
+  //     alignItems: 'center',
+  //     display: 'inline-flex',
+  //     justifyContent: 'center',
+  //
+  //     width: v.iconSize,
+  //     height: v.iconSize,
+  //
+  //     // when loading, hide the icon
+  //     ...(p.loading && {
+  //       margin: 0,
+  //       opacity: 0,
+  //       width: 0,
+  //     }),
+  //
+  //     ...(p.hasContent && {
+  //       margin: `0 ${pxToRem(10)} 0 0`,
+  //       ...(p.iconPosition === 'after' && {
+  //         margin: `0 0 0 ${pxToRem(10)}`,
+  //       }),
+  //     }),
+  //   }),
+  // ],
+]);
+
 export const buttonClassName = 'ui-button';
 
 /**
@@ -157,7 +418,26 @@ export const Button = compose<'button', ButtonProps, ButtonStylesProps, {}, {}>(
       },
       rtl: context.rtl,
     });
-    const { classes, styles: resolvedStyles } = useStyles<ButtonStylesProps>(composeOptions.displayName, {
+
+    const rootClassName = useButtonStyles(
+      {
+        text,
+        primary,
+        disabled,
+        circular,
+        size,
+        loading,
+        inverted,
+        iconOnly,
+        iconPosition,
+        fluid,
+      },
+      buttonClassName,
+      className,
+    );
+    const contentClassName = useButtonContentStyles({ size });
+
+    const { styles: resolvedStyles } = useStyles<ButtonStylesProps>(composeOptions.displayName, {
       className: composeOptions.className,
       mapPropsToStyles: () => ({
         text,
@@ -208,11 +488,9 @@ export const Button = compose<'button', ButtonProps, ButtonStylesProps, {}, {}>(
       });
     };
 
-    const renderContent = () => {
-      return createShorthand(composeOptions.slots.content, content, {
-        defaultProps: () => getA11yProps('content', slotProps.content),
-      });
-    };
+    const contentElement = createShorthand('span', content, {
+      defaultProps: () => getA11yProps('content', { className: contentClassName }),
+    });
 
     const handleClick = (e: React.SyntheticEvent) => {
       if (disabled) {
@@ -232,7 +510,7 @@ export const Button = compose<'button', ButtonProps, ButtonStylesProps, {}, {}>(
         {...rtlTextContainer.getAttributes({ forElements: [children] })}
         {...getA11yProps('root', {
           onClick: handleClick,
-          className: classes.root,
+          className: rootClassName,
           onFocus: handleFocus,
           ref,
           ...unhandledProps,
@@ -244,7 +522,7 @@ export const Button = compose<'button', ButtonProps, ButtonStylesProps, {}, {}>(
           <>
             {loading && renderLoader()}
             {iconPosition !== 'after' && renderIcon()}
-            {renderContent()}
+            {contentElement}
             {iconPosition === 'after' && renderIcon()}
           </>
         )}

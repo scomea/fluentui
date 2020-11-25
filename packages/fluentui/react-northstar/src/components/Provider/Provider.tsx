@@ -27,11 +27,13 @@ import {
 import * as PropTypes from 'prop-types';
 import * as React from 'react';
 
+import { flatten } from './flat';
 import { ChildrenComponentProps, setUpWhatInput, tryCleanupWhatInput, UIComponentProps } from '../../utils';
 
 import { mergeProviderContexts } from '../../utils/mergeProviderContexts';
 import { ProviderConsumer } from './ProviderConsumer';
 import { usePortalBox, PortalBoxContext } from './usePortalBox';
+import { createDOMRenderer } from '@fluentui/make-styles';
 
 export interface ProviderProps extends ChildrenComponentProps, UIComponentProps {
   rtl?: boolean;
@@ -89,6 +91,14 @@ const renderStaticStyles = (renderer: Renderer, theme: ThemeInput, siteVariables
 };
 
 export const providerClassName = 'ui-provider';
+
+function variablesToTokens(siteVariables: SiteVariablesPrepared) {
+  const flatVariables = flatten(siteVariables);
+
+  return _.mapKeys(flatVariables, (value, key) => {
+    return '--theme-' + key.replace(/\./g, '-');
+  });
+}
 
 /**
  * The Provider passes the CSS-in-JS renderer, theme styles and other settings to Fluent UI components.
@@ -192,6 +202,8 @@ export const Provider: ComponentWithAs<'div', ProviderProps> & {
     };
   }, []);
 
+  outgoingContext.makeStylesRenderer = createDOMRenderer(outgoingContext.target);
+
   // do not spread anything - React.Fragment can only have `key` and `children` props
   const elementProps =
     ElementType === React.Fragment
@@ -202,12 +214,15 @@ export const Provider: ComponentWithAs<'div', ProviderProps> & {
           ...unhandledProps,
         };
   const RenderProvider = outgoingContext.renderer.Provider;
+  const style = variablesToTokens(outgoingContext.theme.siteVariables);
 
   return (
     <RenderProvider>
       <Unstable_FluentContextProvider value={outgoingContext}>
         <PortalBoxContext.Provider value={element}>
-          <ElementType {...elementProps}>{children}</ElementType>
+          <div className="provider-variables" style={style}>
+            <ElementType {...elementProps}>{children}</ElementType>
+          </div>
         </PortalBoxContext.Provider>
       </Unstable_FluentContextProvider>
     </RenderProvider>
