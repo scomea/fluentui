@@ -32,14 +32,18 @@
     ]
   },
   "devDependencies": {
+    "@babel/core": "^7.12.10",
     "@fluentui/eslint-plugin": "^1.0.0-beta.0",
     "@fluentui/scripts": "^1.0.0",
     "@types/stylis": "^4.0.0",
+    "babel-plugin-tester": "^10.0.0",
     "prettier": "~1.19.1"
   },
   "dependencies": {
+    "@babel/types": "^7.12.12",
     "@emotion/hash": "^0.8.0",
     "@fluentui/set-version": "^8.0.0-beta.0",
+    "@linaria/babel": "^3.0.0-beta.0",
     "csstype": "^2.6.7",
     "inline-style-expand-shorthand": "^1.2.0",
     "rtl-css-js": "^1.14.0",
