@@ -1,0 +1,27 @@
+<fluent-design-system-provider use-defaults background-color="#F7F7F7">
+  <style>
+    .class-override {
+      height: 163px;
+      width: 300px;
+    }
+
+    .state-override {
+      --card-width: 350px;
+      --card-height: 300px;
+      --elevation: 6;
+    }
+
+    .state-override:hover {
+      --elevation: 12;
+    }
+
+    .controls {
+      display: flex;
+      margin: 20px;
+      flex-direction: column;
+    }
+  </style>
+  <div>
+    <fluent-people-picker> </fluent-people-picker>
+  </div>
+</fluent-design-system-provider>

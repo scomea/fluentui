@@ -14,6 +14,7 @@ export * from './listbox';
 export * from './listbox-option';
 export * from './menu/';
 export * from './menu-item/';
+export * from './people-picker/';
 export * from './progress/';
 export * from './radio/';
 export * from './radio-group/';
